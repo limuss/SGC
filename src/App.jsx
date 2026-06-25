@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import StatsBar from './components/StatsBar';
@@ -478,6 +479,9 @@ export default function App() {
 
       {/* Modern Fixed Toast notifications banner container overlay */}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
+
+      {/* Vercel Web Analytics */}
+      <Analytics />
 
     </div>
   );
