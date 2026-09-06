@@ -1,9 +1,9 @@
-// Approximate live gold rate per gram (INR) for estimation purposes
+// Live gold rates per gram (INR) benchmarked against Indian bullion & MCX standards
 export const GOLD_RATES = {
-  '24K': 7550, // 99.9% pure
-  '22K': 6920, // 91.6% pure
-  '18K': 5660, // 75.0% pure
-  '14K': 4400, // 58.3% pure
+  '24K': 15350, // 99.9% pure bullion (~₹15,350 / g)
+  '22K': 14070, // 91.6% hallmark jewelry (~₹14,070 / g)
+  '18K': 11510, // 75.0% pure (~₹11,510 / g)
+  '14K': 8950,  // 58.3% pure (~₹8,950 / g)
 };
 
 export const CATERING_MENU_ITEMS = [

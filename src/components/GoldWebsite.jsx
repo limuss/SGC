@@ -10,11 +10,21 @@ import sgcGold from '../assets/images/sgc_gold_jewelry_1779942518913.png';
 import elderlyLadyGold from '../assets/images/elderly_lady_gold_1779958425132.png';
 import sgcLogo from '../assets/images/sgc_logo_uploaded.png';
 import { GOLD_RATES } from '../data';
+import { useLiveGoldRates } from '../services/goldRateService';
 import GoldLeadModal from './GoldLeadModal';
 
 export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
   // Lead Generation Modal State - Opens automatically first when someone opens the site/page
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(true);
+
+  // Live Gold Rates from Market API
+  const { 
+    rates: liveRates, 
+    loading: isRatesLoading, 
+    lastUpdated: ratesLastUpdated, 
+    refreshRates, 
+    isLive: isRatesLive 
+  } = useLiveGoldRates();
 
   // Calculator States
   const [goldWeight, setGoldWeight] = useState(15);
@@ -286,9 +296,9 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
     };
   }, []);
 
-  // Compute live calculations
+  // Compute live calculations based on market API rates
   const goldCalculation = useMemo(() => {
-    const rateGram = GOLD_RATES[goldPurity] || 6920;
+    const rateGram = liveRates?.[goldPurity] || GOLD_RATES[goldPurity] || 14070;
     const totalMarketValue = goldWeight * rateGram;
     const serviceCharge = (totalMarketValue * serviceChargePercent) / 100;
     const estimatedValueBeforeLoan = totalMarketValue - serviceCharge;
@@ -304,7 +314,7 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
       netSurplus: netSurplusPayout,
       loanDeduction: parsedLoan,
     };
-  }, [goldWeight, goldPurity, isPledged, loanAmount]);
+  }, [goldWeight, goldPurity, isPledged, loanAmount, liveRates]);
 
   const scrollToCalculator = () => {
     calculatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -489,7 +499,7 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
 
             <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
               Best Price For Your Gold — <br />
-              <span className="text-yellow-500 italic font-medium">Settle &amp; Release Pledged Bank Loans Instantly</span>
+              <span className="text-yellow-500 italic font-medium">Settle &amp; Release Pledged Gold Loans Instantly</span>
             </h1>
 
             <p className="text-sm sm:text-base text-gray-300 leading-relaxed font-light">
@@ -564,6 +574,51 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
 
         </div>
       </section>
+
+      {/* LIVE BULLION SPOT TICKER BANNER */}
+      <div className="bg-[#0b0c16] border-y border-yellow-500/20 py-3 px-4 sticky top-[65px] z-30 shadow-xl backdrop-blur-md bg-opacity-95">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span className="font-bold text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+              <span>LIVE BULLION RATES:</span>
+              <span className="text-[10px] text-gray-400 font-mono hidden sm:inline">({ratesLastUpdated})</span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto py-1 font-mono text-[11px] sm:text-xs">
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded bg-black/40 border border-white/5 whitespace-nowrap">
+              <span className="text-gray-400">24K:</span>
+              <span className="text-yellow-400 font-bold">₹{(liveRates?.['24K'] || GOLD_RATES['24K']).toLocaleString('en-IN')}/g</span>
+            </div>
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded bg-yellow-500/10 border border-yellow-500/30 whitespace-nowrap">
+              <span className="text-yellow-400 font-bold">22K (Hallmark):</span>
+              <span className="text-emerald-400 font-black">₹{(liveRates?.['22K'] || GOLD_RATES['22K']).toLocaleString('en-IN')}/g</span>
+            </div>
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded bg-black/40 border border-white/5 whitespace-nowrap hidden md:flex">
+              <span className="text-gray-400">18K:</span>
+              <span className="text-yellow-400 font-bold">₹{(liveRates?.['18K'] || GOLD_RATES['18K']).toLocaleString('en-IN')}/g</span>
+            </div>
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded bg-black/40 border border-white/5 whitespace-nowrap hidden lg:flex">
+              <span className="text-gray-400">14K:</span>
+              <span className="text-yellow-400 font-bold">₹{(liveRates?.['14K'] || GOLD_RATES['14K']).toLocaleString('en-IN')}/g</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={scrollToCalculator}
+              className="bg-yellow-500 hover:bg-yellow-400 text-black px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <Calculator className="w-3 h-3" />
+              <span>CALCULATE VALUE</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* 3. CORE EXPLANATION: HOW TO RELEASE PLEDGED GOLD (JEWEL HOUSE STYLE) */}
       <section ref={infoRef} className="py-20 bg-[#0a0a0f] border-y border-white/5 text-left scroll-mt-20">
@@ -657,13 +712,47 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
                 Calculate the surplus payout you will receive from SGC Gold after we pay off your bank loan. Choose the weight, purity, and input your outstanding loan amount below to see the transparent math.
               </p>
 
-              <div className="p-4 rounded bg-yellow-500/5 border border-yellow-500/10 text-xs text-yellow-500/90 space-y-1">
-                <p className="font-bold flex items-center gap-1.5"><Info className="w-3.5 h-3.5" /> Current Spot Bullion Price (May 2026):</p>
-                <div className="grid grid-cols-2 gap-2 pt-2 font-mono text-[11px] text-gray-300">
-                  <div>24K Pure Gold: <span className="text-yellow-500 font-bold">₹7,550/g</span></div>
-                  <div>22K Jewelry: <span className="text-yellow-500 font-bold">₹6,920/g</span></div>
-                  <div>18K Gold: <span className="text-yellow-500 font-bold">₹5,660/g</span></div>
-                  <div>14K Gold: <span className="text-yellow-500 font-bold">₹4,400/g</span></div>
+              <div className="p-4 rounded-xl bg-[#0f121d] border border-yellow-500/20 text-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <p className="font-bold flex items-center gap-1.5 text-yellow-400">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    Live Market Spot Rates (INR/Gram):
+                  </p>
+                  <button
+                    type="button"
+                    onClick={refreshRates}
+                    disabled={isRatesLoading}
+                    className="text-[10px] text-yellow-500/80 hover:text-yellow-400 flex items-center gap-1 font-mono transition-colors cursor-pointer"
+                    title="Fetch latest spot rates"
+                  >
+                    <Sliders className={`w-2.5 h-2.5 ${isRatesLoading ? 'animate-spin' : ''}`} />
+                    <span>{isRatesLoading ? 'Syncing...' : 'Sync Feed'}</span>
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2 pt-1 font-mono text-[11px] text-gray-300">
+                  <div className="bg-black/30 p-2 rounded border border-white/5">
+                    <span className="text-gray-400 block text-[9px] uppercase">24K Pure Gold</span>
+                    <span className="text-yellow-400 font-bold text-xs">₹{(liveRates?.['24K'] || GOLD_RATES['24K']).toLocaleString('en-IN')}/g</span>
+                  </div>
+                  <div className="bg-yellow-500/10 p-2 rounded border border-yellow-500/20">
+                    <span className="text-yellow-300 block text-[9px] uppercase font-bold">22K Hallmark Jewelry</span>
+                    <span className="text-emerald-400 font-black text-xs">₹{(liveRates?.['22K'] || GOLD_RATES['22K']).toLocaleString('en-IN')}/g</span>
+                  </div>
+                  <div className="bg-black/30 p-2 rounded border border-white/5">
+                    <span className="text-gray-400 block text-[9px] uppercase">18K Jewelry Gold</span>
+                    <span className="text-yellow-400 font-bold text-xs">₹{(liveRates?.['18K'] || GOLD_RATES['18K']).toLocaleString('en-IN')}/g</span>
+                  </div>
+                  <div className="bg-black/30 p-2 rounded border border-white/5">
+                    <span className="text-gray-400 block text-[9px] uppercase">14K White/Rose Gold</span>
+                    <span className="text-yellow-400 font-bold text-xs">₹{(liveRates?.['14K'] || GOLD_RATES['14K']).toLocaleString('en-IN')}/g</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-[10px] text-gray-500 font-mono pt-1">
+                  <span>Feed: Global Spot + MCX Benchmark</span>
+                  <span className="text-emerald-400">● {ratesLastUpdated}</span>
                 </div>
               </div>
 
@@ -681,6 +770,32 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
             </div>
 
             <div className="lg:col-span-7 bg-[#0b0c14] border border-yellow-500/15 p-6 sm:p-8 rounded-xl shadow-2xl relative">
+              {/* Live Status Header inside Calculator Form */}
+              <div className="flex items-center justify-between pb-4 mb-5 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-[11px] font-mono tracking-wider text-emerald-400 uppercase font-bold">
+                    Live Market Rate Synced
+                  </span>
+                  <span className="text-[10px] text-gray-500 font-mono hidden sm:inline">
+                    ({ratesLastUpdated})
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={refreshRates}
+                  disabled={isRatesLoading}
+                  className="text-[10px] font-mono text-gray-400 hover:text-yellow-400 flex items-center gap-1.5 transition-colors cursor-pointer py-1 px-2.5 rounded bg-white/5 hover:bg-white/10"
+                  title="Refresh live market price"
+                >
+                  <Sliders className={`w-3 h-3 ${isRatesLoading ? 'animate-spin text-yellow-400' : ''}`} />
+                  <span>{isRatesLoading ? 'Fetching...' : 'Refresh API'}</span>
+                </button>
+              </div>
+
               <form onSubmit={handleCalculateSubmit} className="space-y-6">
                 
                 {/* Weight Input */}
@@ -718,24 +833,35 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
                   </div>
                 </div>
 
-                {/* Carat Option */}
+                {/* Carat Option with Live Price Badges */}
                 <div className="space-y-2">
-                  <label className="text-xs text-gray-300 font-semibold uppercase block">Select Gold Purity</label>
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs text-gray-300 font-semibold uppercase block">Select Gold Purity</label>
+                    <span className="text-[10px] text-yellow-500 font-mono">
+                      Current: {goldPurity} @ ₹{(liveRates?.[goldPurity] || GOLD_RATES[goldPurity]).toLocaleString('en-IN')}/g
+                    </span>
+                  </div>
                   <div className="grid grid-cols-4 gap-2">
-                    {Object.keys(GOLD_RATES).map((carat) => (
-                      <button
-                        type="button"
-                        key={carat}
-                        onClick={() => setGoldPurity(carat)}
-                        className={`py-2.5 px-1 rounded text-xs font-bold border transition-all cursor-pointer ${
-                          goldPurity === carat
-                            ? 'bg-yellow-500 border-yellow-500 text-black shadow-md'
-                            : 'bg-[#131521] border-yellow-500/10 hover:border-yellow-500/30 text-gray-400 hover:text-yellow-500'
-                        }`}
-                      >
-                        {carat}
-                      </button>
-                    ))}
+                    {Object.keys(GOLD_RATES).map((carat) => {
+                      const caratRate = liveRates?.[carat] || GOLD_RATES[carat];
+                      return (
+                        <button
+                          type="button"
+                          key={carat}
+                          onClick={() => setGoldPurity(carat)}
+                          className={`py-2 px-1 rounded-lg text-center border transition-all cursor-pointer ${
+                            goldPurity === carat
+                              ? 'bg-yellow-500 border-yellow-500 text-black shadow-lg shadow-yellow-500/20'
+                              : 'bg-[#131521] border-yellow-500/10 hover:border-yellow-500/30 text-gray-300 hover:text-yellow-400'
+                          }`}
+                        >
+                          <span className="block text-xs font-bold">{carat}</span>
+                          <span className={`block text-[10px] font-mono mt-0.5 ${goldPurity === carat ? 'text-black font-extrabold' : 'text-emerald-400 font-semibold'}`}>
+                            ₹{caratRate ? caratRate.toLocaleString('en-IN') : '...'}/g
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 

@@ -7,8 +7,11 @@ import {
 } from 'lucide-react';
 import sgcLogo from '../assets/images/sgc_logo_uploaded.png';
 import { submitToFormBold } from '../lib/formbold';
+import { useLiveGoldRates } from '../services/goldRateService';
 
 export default function GoldLeadModal({ isOpen, onClose, onSubmitInquiry }) {
+  const { rates: liveRates, lastUpdated: ratesLastUpdated } = useLiveGoldRates();
+
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [serviceType, setServiceType] = useState('pledged_release'); // 'pledged_release' | 'sell_gold' | 'xrf_assay'
@@ -281,6 +284,17 @@ export default function GoldLeadModal({ isOpen, onClose, onSubmitInquiry }) {
                   <p className="text-xs text-gray-300 font-light leading-relaxed">
                     Clear bank dues at Muthoot, Manappuram, IIFL or commercial banks. 100% transparent assay, 3% flat handling fee, zero weight melting loss.
                   </p>
+                  
+                  {/* Live Rate Chip */}
+                  <div className="inline-flex items-center gap-2 py-1 px-2.5 rounded-md bg-yellow-500/10 border border-yellow-500/20 text-[11px] font-mono text-yellow-400">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span>Live 22K (Hallmark): <strong>₹{liveRates?.['22K']?.toLocaleString('en-IN') || '14,070'}/g</strong></span>
+                    <span className="text-gray-500">|</span>
+                    <span className="text-gray-300">24K: ₹{liveRates?.['24K']?.toLocaleString('en-IN') || '15,350'}/g</span>
+                  </div>
                 </div>
 
                 {/* Error Banner if any */}

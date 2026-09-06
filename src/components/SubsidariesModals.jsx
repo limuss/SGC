@@ -4,19 +4,27 @@ import {
   X, Calculator, Info, CheckCircle, 
   Plus, Minus, Hash, IndianRupee, MapPin, 
   Maximize2, BedDouble, Bath, ChevronRight, 
-  SlidersHorizontal, Sparkles, Filter 
+  SlidersHorizontal, Sparkles, Filter, RefreshCw 
 } from 'lucide-react';
 import { GOLD_RATES, CATERING_MENU_ITEMS, REAL_ESTATE_LISTINGS } from '../data';
+import { useLiveGoldRates } from '../services/goldRateService';
 
 export default function SubsidariesModals({ activeSection, onClose, onInquire }) {
 
   // --- SGC GOLD CALCULATOR STATE ---
+  const { 
+    rates: liveGoldRates, 
+    loading: isRatesLoading, 
+    lastUpdated: ratesLastUpdated, 
+    refreshRates 
+  } = useLiveGoldRates();
+
   const [goldWeight, setGoldWeight] = useState(10);
   const [goldPurity, setGoldPurity] = useState('22K');
   const serviceChargePercent = 3; // SGC Service margin
 
   const goldCalculation = useMemo(() => {
-    const rateGram = GOLD_RATES[goldPurity];
+    const rateGram = liveGoldRates?.[goldPurity] || GOLD_RATES[goldPurity] || 14070;
     const totalMarketValue = goldWeight * rateGram;
     const serviceCharge = (totalMarketValue * serviceChargePercent) / 100;
     const estimatedPayout = totalMarketValue - serviceCharge;
@@ -27,7 +35,7 @@ export default function SubsidariesModals({ activeSection, onClose, onInquire })
       serviceCharge,
       payout: estimatedPayout,
     };
-  }, [goldWeight, goldPurity]);
+  }, [goldWeight, goldPurity, liveGoldRates]);
 
 
   // --- RESTAURANT / CATERING STATE ---
@@ -188,10 +196,22 @@ export default function SubsidariesModals({ activeSection, onClose, onInquire })
                     
                     <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-500/5 rounded-full filter blur-[40px] pointer-events-none"></div>
 
-                    {/* Calculator title */}
-                    <div className="flex items-center gap-2.5 pb-3 border-b border-yellow-500/10">
-                      <Calculator className="w-5 h-5 text-yellow-500" />
-                      <h4 className="font-serif text-lg font-bold text-white">Live Gold Payout Estimator</h4>
+                    {/* Calculator title with Live Status */}
+                    <div className="flex items-center justify-between pb-3 border-b border-yellow-500/10">
+                      <div className="flex items-center gap-2.5">
+                        <Calculator className="w-5 h-5 text-yellow-500" />
+                        <h4 className="font-serif text-lg font-bold text-white">Live Gold Payout Estimator</h4>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={refreshRates}
+                        disabled={isRatesLoading}
+                        className="text-[10px] font-mono text-gray-400 hover:text-yellow-400 flex items-center gap-1.5 transition-colors cursor-pointer py-1 px-2 rounded bg-white/5"
+                        title="Sync with live market spot price"
+                      >
+                        <RefreshCw className={`w-2.5 h-2.5 ${isRatesLoading ? 'animate-spin text-yellow-400' : ''}`} />
+                        <span>{isRatesLoading ? 'Syncing...' : 'Live Feed'}</span>
+                      </button>
                     </div>
 
                     {/* Weight controller input */}
@@ -225,26 +245,37 @@ export default function SubsidariesModals({ activeSection, onClose, onInquire })
                       </div>
                     </div>
 
-                    {/* Carat Purity Grid buttons */}
+                    {/* Carat Purity Grid buttons with live prices */}
                     <div className="space-y-2">
-                      <label className="text-xs text-gray-300 font-semibold uppercase tracking-wider block">Select Purity Caratage</label>
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs text-gray-300 font-semibold uppercase tracking-wider block">Select Purity Caratage</label>
+                        <span className="text-[10px] text-emerald-400 font-mono font-semibold">
+                          ● {ratesLastUpdated}
+                        </span>
+                      </div>
                       <div className="grid grid-cols-4 gap-2">
-                        {Object.keys(GOLD_RATES).map((carat) => (
-                          <button
-                            key={carat}
-                            onClick={() => setGoldPurity(carat)}
-                            className={`py-3 px-1 rounded-lg text-xs font-bold border transition-all duration-300 cursor-pointer ${
-                              goldPurity === carat
-                                ? 'bg-yellow-500 border-yellow-500 text-black shadow-lg shadow-yellow-500/20'
-                                : 'bg-[#151a2e] border-yellow-500/15 hover:border-yellow-500/40 text-gray-300 hover:text-yellow-500'
-                            }`}
-                          >
-                            {carat}
-                            <span className="block text-[8px] font-light opacity-80 mt-0.5">
-                              {carat === '24K' ? '99.9%' : carat === '22K' ? '91.6%' : carat === '18K' ? '75%' : '58%'} pure
-                            </span>
-                          </button>
-                        ))}
+                        {Object.keys(GOLD_RATES).map((carat) => {
+                          const currentRate = (liveGoldRates || GOLD_RATES)[carat];
+                          return (
+                            <button
+                              key={carat}
+                              onClick={() => setGoldPurity(carat)}
+                              className={`py-2.5 px-1 rounded-lg text-xs font-bold border transition-all duration-300 cursor-pointer text-center ${
+                                goldPurity === carat
+                                  ? 'bg-yellow-500 border-yellow-500 text-black shadow-lg shadow-yellow-500/20'
+                                  : 'bg-[#151a2e] border-yellow-500/15 hover:border-yellow-500/40 text-gray-300 hover:text-yellow-500'
+                              }`}
+                            >
+                              <span className="block">{carat}</span>
+                              <span className={`block text-[10px] font-mono mt-0.5 ${goldPurity === carat ? 'text-black font-extrabold' : 'text-emerald-400 font-semibold'}`}>
+                                ₹{currentRate ? currentRate.toLocaleString('en-IN') : '...'}/g
+                              </span>
+                              <span className="block text-[8px] font-light opacity-75 mt-0.5">
+                                {carat === '24K' ? '99.9%' : carat === '22K' ? '91.6%' : carat === '18K' ? '75%' : '58%'}
+                              </span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
