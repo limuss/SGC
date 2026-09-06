@@ -279,7 +279,7 @@ export default function GoldLeadModal({ isOpen, onClose, onSubmitInquiry }) {
                     Get Instant Gold Valuation &amp; Pledged Loan Clearance Quote
                   </h2>
                   <p className="text-xs text-gray-300 font-light leading-relaxed">
-                    Clear bank dues at Muthoot, Manappuram, IIFL or commercial banks. 100% transparent assay, 1.5% flat handling fee, zero weight melting loss.
+                    Clear bank dues at Muthoot, Manappuram, IIFL or commercial banks. 100% transparent assay, 3% flat handling fee, zero weight melting loss.
                   </p>
                 </div>
 

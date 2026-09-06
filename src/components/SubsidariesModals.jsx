@@ -13,7 +13,7 @@ export default function SubsidariesModals({ activeSection, onClose, onInquire })
   // --- SGC GOLD CALCULATOR STATE ---
   const [goldWeight, setGoldWeight] = useState(10);
   const [goldPurity, setGoldPurity] = useState('22K');
-  const serviceChargePercent = 1.5; // SGC Service margin
+  const serviceChargePercent = 3; // SGC Service margin
 
   const goldCalculation = useMemo(() => {
     const rateGram = GOLD_RATES[goldPurity];

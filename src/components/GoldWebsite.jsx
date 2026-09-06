@@ -21,7 +21,7 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
   const [goldPurity, setGoldPurity] = useState('22K');
   const [isPledged, setIsPledged] = useState(false);
   const [loanAmount, setLoanAmount] = useState('');
-  const serviceChargePercent = 1.5;
+  const serviceChargePercent = 3;
 
   // Form States
   const [name, setName] = useState('');
@@ -247,7 +247,7 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
               "name": "What are the service charges for releasing pledged gold loan accounts?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "SGC Gold charges a transparent flat fee of only 1.5% as a handling and processing service charge on the absolute gross value of your gold. There are absolutely no hidden administrative fees, melt fees, or weight deduction penalties, giving you the best possible financial outcome."
+                "text": "SGC Gold charges a transparent flat fee of only 3% as a handling and processing service charge on the absolute gross value of your gold. There are absolutely no hidden administrative fees, melt fees, or weight deduction penalties, giving you the best possible financial outcome."
               }
             }
           ]
@@ -376,7 +376,7 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
     },
     {
       q: "Are there any hidden fees or deductions at SGC Gold desk?",
-      a: "No, we follow a strictly transparent pricing policy. SGC Gold charges a nominal processing and service fee of only 1.5% on the gross value of your gold. Unlike local jewelers, we do not apply hidden melting charges, stone weight deductions, or standard custom discounts, resulting in the maximum cash surplus payout."
+      a: "No, we follow a strictly transparent pricing policy. SGC Gold charges a nominal processing and service fee of only 3% on the gross value of your gold. Unlike local jewelers, we do not apply hidden melting charges, stone weight deductions, or standard custom discounts, resulting in the maximum cash surplus payout."
     },
     {
       q: "How can I check the live gold loan release value before visiting?",
@@ -604,7 +604,7 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
               </div>
               <h3 className="font-serif text-lg font-bold text-yellow-400">Step 3: Assay &amp; Cash Surplus</h3>
               <p className="text-xs text-gray-300 leading-relaxed font-light">
-                We bring the gold back to our corporate desk. Purity is scanned via the XRF spectrometer in 1 minute with 100% computer precision. SGC deducts the cleared loan amount and a flat 1.5% service charge, paying you the rest instantly in cash or bank transfer.
+                We bring the gold back to our corporate desk. Purity is scanned via the XRF spectrometer in 1 minute with 100% computer precision. SGC deducts the cleared loan amount and a flat 3% service charge, paying you the rest instantly in cash or bank transfer.
               </p>
             </div>
           </div>
