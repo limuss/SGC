@@ -14,6 +14,7 @@ import GoldWebsite from './components/GoldWebsite';
 import CateringWebsite from './components/CateringWebsite';
 import RealEstateWebsite from './components/RealEstateWebsite';
 import AboutPage from './components/AboutPage';
+import KnowledgeCenter from './components/KnowledgeCenter';
 import { 
   saveInquiryToFirestore, 
   auth, 
@@ -22,6 +23,7 @@ import {
   subscribeToSupabaseRealtime
 } from './lib/firestorePlaceholder';
 import { deleteInquiryFromSupabase } from './lib/supabaseClient';
+import { submitToFormBold } from './lib/formbold';
 import { onAuthStateChanged } from 'firebase/auth';
 import { appendInquiriesToSpreadsheet } from './lib/googleSheets';
 import { sendInquiryEmail } from './lib/gmail';
@@ -41,6 +43,17 @@ export default function App() {
       const hash = decodeURIComponent(window.location.hash).toLowerCase();
       const params = new URLSearchParams(window.location.search);
       
+      if (
+        path.includes('group') || 
+        path.includes('portal') || 
+        path.includes('corporate') || 
+        hash.includes('group') || 
+        hash.includes('corporate') || 
+        params.get('division') === 'sgc' || 
+        params.get('division') === 'group'
+      ) {
+        return 'sgc';
+      }
       if (
         path.includes('sgc gold') || 
         path.includes('gold') || 
@@ -71,17 +84,27 @@ export default function App() {
       ) {
         return 'about';
       }
+      if (
+        path.includes('knowledge') || 
+        path.includes('resources') || 
+        path.includes('blog') ||
+        hash.includes('knowledge') || 
+        params.get('division') === 'knowledge_center'
+      ) {
+        return 'knowledge_center';
+      }
     } catch (e) {
       console.warn('Failed to parse active website from URL', e);
     }
-    return 'sgc';
+    // Main default page when someone opens the site: SGC Gold
+    return 'gold';
   });
 
   // URL sync logic to enable clean, bookmarkable URLs (like /SGC Gold or /Catering)
   useEffect(() => {
     try {
       const currentPath = decodeURIComponent(window.location.pathname).toLowerCase();
-      if (activeWebsite === 'gold' && !currentPath.includes('sgc gold') && !currentPath.includes('gold')) {
+      if (activeWebsite === 'gold' && !currentPath.includes('sgc gold') && !currentPath.includes('gold') && currentPath !== '/' && currentPath !== '') {
         window.history.pushState({ website: 'gold' }, '', '/SGC Gold');
       } else if (activeWebsite === 'catering' && !currentPath.includes('catering')) {
         window.history.pushState({ website: 'catering' }, '', '/Catering');
@@ -89,8 +112,10 @@ export default function App() {
         window.history.pushState({ website: 'real_estate' }, '', '/Real Estate');
       } else if (activeWebsite === 'about' && !currentPath.includes('about')) {
         window.history.pushState({ website: 'about' }, '', '/About');
-      } else if (activeWebsite === 'sgc' && currentPath !== '/' && currentPath !== '') {
-        window.history.pushState({ website: 'sgc' }, '', '/');
+      } else if (activeWebsite === 'knowledge_center' && !currentPath.includes('knowledge')) {
+        window.history.pushState({ website: 'knowledge_center' }, '', '/Knowledge Center');
+      } else if (activeWebsite === 'sgc' && !currentPath.includes('group') && !currentPath.includes('portal')) {
+        window.history.pushState({ website: 'sgc' }, '', '/Group Portal');
       }
     } catch (e) {
       console.warn('Failed to sync state to URL bar', e);
@@ -106,6 +131,16 @@ export default function App() {
         const params = new URLSearchParams(window.location.search);
         
         if (
+          path.includes('group') || 
+          path.includes('portal') || 
+          path.includes('corporate') || 
+          hash.includes('group') || 
+          hash.includes('corporate') || 
+          params.get('division') === 'sgc' || 
+          params.get('division') === 'group'
+        ) {
+          setActiveWebsite('sgc');
+        } else if (
           path.includes('sgc gold') || 
           path.includes('gold') || 
           hash.includes('gold') || 
@@ -131,8 +166,16 @@ export default function App() {
           params.get('division') === 'about'
         ) {
           setActiveWebsite('about');
+        } else if (
+          path.includes('knowledge') || 
+          path.includes('resources') || 
+          path.includes('blog') ||
+          hash.includes('knowledge') || 
+          params.get('division') === 'knowledge_center'
+        ) {
+          setActiveWebsite('knowledge_center');
         } else {
-          setActiveWebsite('sgc');
+          setActiveWebsite('gold');
         }
       } catch (e) {
         console.warn('Failed to parse URL in popstate listener', e);
@@ -315,7 +358,36 @@ export default function App() {
       console.warn('[App] Firestore blueprint placeholder logged an issue:', dbErr);
     }
 
-    // 1.5. FORMSPREE LEAD ROUTING WORKFLOW
+    // 1.5. FORMBOLD LEAD ROUTING WORKFLOW (https://formbold.com)
+    // Dispatches every client inquiry across all website forms to FormBold serverless endpoint
+    try {
+      submitToFormBold({
+        name: formattedInq.name,
+        phone: formattedInq.phone,
+        email: formattedInq.email,
+        businessSection: formattedInq.businessSection,
+        service: formattedInq.service || formattedInq.serviceType,
+        source: formattedInq.source || 'SGC Lead Form',
+        location: formattedInq.city || formattedInq.location,
+        goldWeight: formattedInq.goldWeight,
+        lender: formattedInq.lender,
+        loanAmount: formattedInq.loanAmount,
+        message: formattedInq.message,
+        date: formattedInq.date
+      }).then((res) => {
+        if (res && res.success) {
+          console.log('[App] Successfully recorded lead in FormBold.');
+        } else {
+          console.info('[App] FormBold dispatch result:', res?.error || 'Processed');
+        }
+      }).catch((err) => {
+        console.warn('[App] FormBold transmission note:', err);
+      });
+    } catch (fbErr) {
+      console.warn('[App] FormBold submission catch:', fbErr);
+    }
+
+    // 1.6. FORMSPREE LEAD ROUTING WORKFLOW
     // Send form data automatically to the requested Formspree endpoint: https://formspree.io/f/xzdldwdo
     try {
       fetch('https://formspree.io/f/xzdldwdo', {
@@ -349,12 +421,12 @@ export default function App() {
     addToast(
       'Inquiry Submitted!',
       'success',
-      `Saved locally. Redirecting to SGC WhatsApp Desk...`,
-      4000
+      `Lead registered. Redirecting to WhatsApp (+91 91863 76081)...`,
+      4500
     );
 
     // 2. WHATSAPP REDIRECTION WORKFLOW
-    // Centralized redirection to the SGC J&K Mobile WhatsApp Desk: +91 78894 34741
+    // Centralized redirection to the SGC J&K Mobile WhatsApp Desk: +91 91863 76081
     const divisionLabels = {
       gold: '👑 SGC Gold Buying & Loan Settlement',
       real_estate: '🏢 SGC Real Estate Advisory',
@@ -363,18 +435,36 @@ export default function App() {
     };
 
     const label = divisionLabels[formattedInq.businessSection] || divisionLabels.general;
-    const whatsappMessage = `*SGC GROUP OF COMPANIES - CUSTOMER INQUIRY*\n\n` +
+    let whatsappMessage = `*SGC GROUP OF COMPANIES - NEW CUSTOMER INQUIRY*\n\n` +
       `*Division:* ${label}\n` +
       `*Client Name:* ${formattedInq.name}\n` +
-      `*Contact Number:* ${formattedInq.phone}\n` +
-      `*Email Address:* ${formattedInq.email || 'Not provided'}\n` +
-      `*Message / Request Details:* ${formattedInq.message || 'No additional details provided'}\n\n` +
-      `_Sent securely via SGC Corporate Portal_`;
+      `*Contact Number:* ${formattedInq.phone}\n`;
+
+    if (formattedInq.service) {
+      whatsappMessage += `*Service Requested:* ${formattedInq.service}\n`;
+    }
+    if (formattedInq.goldWeight) {
+      whatsappMessage += `*Estimated Gold Weight:* ${formattedInq.goldWeight}\n`;
+    }
+    if (formattedInq.lender) {
+      whatsappMessage += `*Pledged Lender:* ${formattedInq.lender}\n`;
+    }
+    if (formattedInq.loanAmount) {
+      whatsappMessage += `*Approx Loan Due:* ${formattedInq.loanAmount}\n`;
+    }
+    if (formattedInq.city || formattedInq.location) {
+      whatsappMessage += `*Preferred City:* ${formattedInq.city || formattedInq.location}\n`;
+    }
+    if (formattedInq.email && !formattedInq.email.includes('No email provided') && !formattedInq.email.includes('Direct Lead Form')) {
+      whatsappMessage += `*Email Address:* ${formattedInq.email}\n`;
+    }
+    whatsappMessage += `*Message / Notes:* ${formattedInq.message || 'Customer requested call/valuation'}\n\n` +
+      `_Hello SGC Desk, I just submitted an inquiry on your website and would like to chat on WhatsApp._`;
 
     const encodedText = encodeURIComponent(whatsappMessage);
-    const whatsappUrl = `https://wa.me/917889434741?text=${encodedText}`;
+    const whatsappUrl = `https://wa.me/919186376081?text=${encodedText}`;
 
-    // Perform secure, responsive redirect after 1.2s so the user sees the confirmation toast
+    // Perform secure, responsive redirect after 600ms so the user sees the confirmation toast
     setTimeout(() => {
       try {
         const opened = window.open(whatsappUrl, '_blank');
@@ -385,7 +475,7 @@ export default function App() {
       } catch (err) {
         window.location.href = whatsappUrl;
       }
-    }, 1200);
+    }, 600);
   };
 
   // Delete inquiries
@@ -492,6 +582,18 @@ export default function App() {
     );
   }
 
+  if (activeWebsite === 'knowledge_center') {
+    return (
+      <KnowledgeCenter 
+        onBackToParent={() => {
+          setActiveWebsite('sgc');
+          window.scrollTo(0, 0);
+        }}
+        onSubmitInquiry={handleAddInquiry}
+      />
+    );
+  }
+
   return (
     <div className="relative min-h-screen bg-[#060608] font-sans antialiased text-[#f3f4f6]">
       
@@ -508,6 +610,11 @@ export default function App() {
           setActiveWebsite('gold');
           window.scrollTo(0, 0);
         }}
+        onOpenKnowledgeCenter={() => {
+          setActiveWebsite('knowledge_center');
+          window.scrollTo(0, 0);
+        }}
+        activeWebsite={activeWebsite}
       />
 
       <main className="relative pb-4">
@@ -558,6 +665,10 @@ export default function App() {
       <Footer 
         onOpenAboutPage={() => {
           setActiveWebsite('about');
+          window.scrollTo(0, 0);
+        }}
+        onOpenKnowledgeCenter={() => {
+          setActiveWebsite('knowledge_center');
           window.scrollTo(0, 0);
         }}
       />

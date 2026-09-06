@@ -66,13 +66,15 @@ export default forwardRef(function ContactBanner(
 
     setIsSubmitting(true);
 
-    // Simulate standard server-side submission
+    // Promptly transmit inquiry and trigger WhatsApp redirection
     setTimeout(() => {
       onSubmitInquiry({
         name,
         email: email || 'No email provided',
         phone,
         businessSection: prefillBusiness !== 'general' ? prefillBusiness : businessSection,
+        service: 'Corporate Business Consultation',
+        source: 'Corporate Contact Banner',
         message: prefillMessage || message || 'Requesting general information packet.'
       });
 
@@ -90,7 +92,7 @@ export default forwardRef(function ContactBanner(
         setSubmittedSuccess(false);
         setShowForm(false);
       }, 4000);
-    }, 1200);
+    }, 350);
   };
 
   return (
@@ -128,7 +130,7 @@ export default forwardRef(function ContactBanner(
             <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 divide-y sm:divide-y-0 lg:divide-y divide-yellow-500/10">
               {/* Call card */}
               <a 
-                href="tel:7889434741" 
+                href="tel:9186376081" 
                 className="flex items-center gap-3.5 group cursor-pointer text-left sm:pr-4"
               >
                 <div className="w-10 h-10 rounded-full flex items-center justify-center bg-yellow-500/5 group-hover:bg-yellow-500/10 border border-yellow-500/10 group-hover:border-yellow-500/30 transition-colors shrink-0 text-yellow-500">
@@ -136,13 +138,13 @@ export default forwardRef(function ContactBanner(
                 </div>
                 <div>
                   <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest leading-none block">Call Us</span>
-                  <span className="font-sans font-bold text-base text-white group-hover:text-yellow-400 mt-1 block">7889 434 741</span>
+                  <span className="font-sans font-bold text-base text-white group-hover:text-yellow-400 mt-1 block">91863 76081</span>
                 </div>
               </a>
 
               {/* Whatsapp card */}
               <a 
-                href="https://wa.me/917889434741" 
+                href="https://wa.me/919186376081" 
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-3.5 group cursor-pointer text-left pt-4 sm:pt-0 lg:pt-4 sm:pl-4 lg:pl-0"
@@ -152,7 +154,7 @@ export default forwardRef(function ContactBanner(
                 </div>
                 <div>
                   <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest leading-none block">WhatsApp Us</span>
-                  <span className="font-sans font-bold text-base text-white group-hover:text-emerald-400 mt-1 block">7889 434 741</span>
+                  <span className="font-sans font-bold text-base text-white group-hover:text-emerald-400 mt-1 block">91863 76081</span>
                 </div>
               </a>
             </div>
@@ -241,7 +243,7 @@ export default forwardRef(function ContactBanner(
                       <input
                         type="tel"
                         required
-                        placeholder="+91 7889 000 000"
+                        placeholder="+91 9186 000 000"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         className="w-full bg-[#111425] border border-white/5 focus:border-yellow-500/50 rounded p-3 text-xs outline-none text-white transition-colors"
@@ -311,8 +313,8 @@ export default forwardRef(function ContactBanner(
                       {isSubmitting ? (
                         <span>TRANSMITTING MESSAGE...</span>
                       ) : submittedSuccess ? (
-                        <span className="flex items-center gap-1">
-                          <Check className="w-4 h-4 text-green-700" /> INQUIRY SAVED SUCCESS
+                        <span className="flex items-center gap-1.5 text-emerald-950 font-black">
+                          <Check className="w-4 h-4 text-emerald-950" /> OPENING WHATSAPP...
                         </span>
                       ) : (
                         <span className="flex items-center gap-1.5">

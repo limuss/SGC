@@ -1,7 +1,7 @@
 import { Facebook, Instagram, MessageCircle, MapPin, Phone, Mail } from 'lucide-react';
 import sgcLogo from '../assets/images/sgc_logo_uploaded.png';
 
-export default function Footer({ onOpenAboutPage }) {
+export default function Footer({ onOpenAboutPage, onOpenKnowledgeCenter }) {
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
     if (element) {
@@ -63,12 +63,13 @@ export default function Footer({ onOpenAboutPage }) {
             QUICK LINKS
           </h4>
           <ul className="space-y-2 text-xs">
-            {['HOME', 'ABOUT US', 'OUR BUSINESSES', 'WHY SGC', 'CONTACT US'].map((link) => {
+            {['HOME', 'ABOUT US', 'OUR BUSINESSES', 'WHY SGC', 'KNOWLEDGE CENTER', 'CONTACT US'].map((link) => {
               const ids = {
                 'HOME': 'home',
                 'ABOUT US': 'about',
                 'OUR BUSINESSES': 'businesses',
                 'WHY SGC': 'why-sgc',
+                'KNOWLEDGE CENTER': 'knowledge_center',
                 'CONTACT US': 'contact'
               };
               return (
@@ -77,6 +78,8 @@ export default function Footer({ onOpenAboutPage }) {
                     onClick={() => {
                       if (link === 'ABOUT US' && onOpenAboutPage) {
                         onOpenAboutPage();
+                      } else if (link === 'KNOWLEDGE CENTER' && onOpenKnowledgeCenter) {
+                        onOpenKnowledgeCenter();
                       } else {
                         scrollToSection(ids[link]);
                       }
@@ -130,8 +133,8 @@ export default function Footer({ onOpenAboutPage }) {
             </li>
             <li className="flex gap-2.5 items-center">
               <Phone className="w-4 h-4 text-yellow-500 shrink-0" />
-              <a href="tel:7889434741" className="hover:text-yellow-500 transition-colors">
-                7889 434 741
+              <a href="tel:9186376081" className="hover:text-yellow-500 transition-colors">
+                91863 76081
               </a>
             </li>
             <li className="flex gap-2.5 items-center">
@@ -171,7 +174,7 @@ export default function Footer({ onOpenAboutPage }) {
             <Instagram className="w-4 h-4" />
           </a>
           <a
-            href="https://wa.me/917889434741"
+            href="https://wa.me/919186376081"
             target="_blank"
             rel="noreferrer"
             className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 text-gray-400 hover:text-emerald-400 hover:bg-emerald-500/15 border border-white/10 hover:border-emerald-500/30 transition-all cursor-pointer"

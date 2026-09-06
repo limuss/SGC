@@ -9,6 +9,7 @@ import {
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { auth, loginWithGoogle, logoutUser, updateInquiryInFirestore } from '../lib/firestorePlaceholder';
 import { onAuthStateChanged } from 'firebase/auth';
+import { getFormBoldFormId, setFormBoldFormId, testFormBoldEndpoint } from '../lib/formbold';
 
 const ADMIN_EMAILS = [
   'salafimubashirlone@gmail.com',
@@ -116,9 +117,56 @@ export default function CompanyAdminDashboard({
         details: 'Active relational PostgreSQL instance fully operational. Parallel lead saves and real-time query pipelines active.'
       });
 
+      const currentFormBoldId = getFormBoldFormId();
+      const isCustomFormBold = currentFormBoldId && currentFormBoldId !== 'YOUR_FORMBOLD_ID';
+      tests.push({
+        region: 'FormBold Serverless Relay',
+        status: isCustomFormBold ? 'success' : 'info',
+        url: `https://formbold.com/s/${currentFormBoldId}`,
+        details: isCustomFormBold
+          ? `Connected to FormBold Form [${currentFormBoldId}]. Direct webhook routing active for all website lead forms.`
+          : 'FormBold endpoint ready. Enter your FormBold Form ID below to route lead notifications directly to your inbox.'
+      });
+
       setRtdbTests(tests);
       setIsTestingRtdb(false);
     }, 300);
+  };
+
+  // FormBold configuration state
+  const [formBoldInput, setFormBoldInput] = useState(() => getFormBoldFormId());
+  const [isTestingFormBold, setIsTestingFormBold] = useState(false);
+  const [formBoldStatus, setFormBoldStatus] = useState({ state: 'idle', message: '' });
+
+  const handleSaveAndTestFormBold = async () => {
+    const cleanId = formBoldInput.trim();
+    if (!cleanId) {
+      setFormBoldStatus({
+        state: 'warning',
+        message: 'Please enter a valid FormBold Form ID (e.g. 9Qx1M).'
+      });
+      return;
+    }
+
+    setFormBoldFormId(cleanId);
+    setIsTestingFormBold(true);
+    setFormBoldStatus({ state: 'testing', message: 'Testing FormBold endpoint connectivity...' });
+
+    const result = await testFormBoldEndpoint(cleanId);
+    setIsTestingFormBold(false);
+    if (result.success) {
+      setFormBoldStatus({
+        state: 'success',
+        message: `Success! FormBold accepted the test payload for form [${cleanId}]. All website leads are active.`
+      });
+      runRtdbDiagnostics();
+    } else {
+      setFormBoldStatus({
+        state: 'error',
+        message: `${result.message} (Form ID saved locally for testing).`
+      });
+      runRtdbDiagnostics();
+    }
   };
 
   useEffect(() => {
@@ -905,6 +953,65 @@ export default function CompanyAdminDashboard({
                       {rtdbTests.length === 0 && (
                         <div className="col-span-3 text-center py-4 text-xs text-gray-500 font-sans">
                           {isTestingRtdb ? 'Testing database link...' : 'Click "Run Connection Test" above to start testing.'}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* FormBold Serverless Lead Integration Card */}
+                    <div className="bg-[#101424] border border-blue-500/20 rounded-xl p-4 space-y-3 text-left">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-3">
+                        <div>
+                          <div className="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider font-sans">
+                            <Mail className="w-4 h-4 text-blue-400" />
+                            <span>FormBold Serverless Lead Relay</span>
+                          </div>
+                          <p className="text-[11px] text-gray-400 mt-0.5">
+                            All website lead forms (Instant Gold Lead Modal, Contact Banner, Catering, Real Estate) automatically relay submissions to FormBold.
+                          </p>
+                        </div>
+                        <a 
+                          href="https://formbold.com" 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="text-[10px] text-blue-400 hover:text-blue-300 underline font-mono flex items-center gap-1"
+                        >
+                          Open FormBold Dashboard &rarr;
+                        </a>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                        <div className="sm:col-span-8 flex items-center gap-2">
+                          <span className="text-[11px] text-gray-400 font-mono shrink-0">Form ID:</span>
+                          <input 
+                            type="text" 
+                            value={formBoldInput}
+                            onChange={(e) => setFormBoldInput(e.target.value)}
+                            placeholder="Enter FormBold ID (e.g. 9Qx1M)"
+                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white font-mono placeholder-gray-600 focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+                        <div className="sm:col-span-4 flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={handleSaveAndTestFormBold}
+                            disabled={isTestingFormBold}
+                            className="w-full px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                          >
+                            <RotateCw className={`w-3 h-3 ${isTestingFormBold ? 'animate-spin' : ''}`} />
+                            <span>{isTestingFormBold ? 'Testing...' : 'Save & Test'}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {formBoldStatus.message && (
+                        <div className={`text-[11px] px-3 py-2 rounded-lg border leading-relaxed ${
+                          formBoldStatus.state === 'success' 
+                            ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' 
+                            : formBoldStatus.state === 'error'
+                            ? 'bg-rose-500/10 text-rose-300 border-rose-500/20'
+                            : 'bg-amber-500/10 text-amber-300 border-amber-500/20'
+                        }`}>
+                          {formBoldStatus.message}
                         </div>
                       )}
                     </div>

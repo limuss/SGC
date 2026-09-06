@@ -100,6 +100,8 @@ export default function RealEstateWebsite({ onBackToParent, onSubmitInquiry }) {
         email: 'No email provided (Salafi Realestate Portal)',
         phone,
         businessSection: 'real_estate',
+        service: 'Property Acquisition / Site Visit Booking',
+        source: 'Salafi Real Estate Lead Form',
         message: msg || `Real-estate consultation requested regarding catalog property holdings.`
       });
       setIsSubmitting(false);
@@ -108,7 +110,7 @@ export default function RealEstateWebsite({ onBackToParent, onSubmitInquiry }) {
       setPhone('');
       setMsg('');
       setTimeout(() => setSubmitSuccess(false), 3000);
-    }, 1500);
+    }, 350);
   };
 
   return (
@@ -441,7 +443,7 @@ export default function RealEstateWebsite({ onBackToParent, onSubmitInquiry }) {
                   {isSubmitting ? (
                     <span>MUTATING RECORDS...</span>
                   ) : submitSuccess ? (
-                    <span className="flex items-center gap-1"><Check className="w-4 h-4 text-sky-950" /> SLOT SECURED</span>
+                    <span className="flex items-center gap-1"><Check className="w-4 h-4 text-sky-950" /> OPENING WHATSAPP...</span>
                   ) : (
                     <span className="flex items-center gap-1.5"><Send className="w-3.5 h-3.5" /> REQUEST DEED COPY</span>
                   )}

@@ -10,8 +10,12 @@ import sgcGold from '../assets/images/sgc_gold_jewelry_1779942518913.png';
 import elderlyLadyGold from '../assets/images/elderly_lady_gold_1779958425132.png';
 import sgcLogo from '../assets/images/sgc_logo_uploaded.png';
 import { GOLD_RATES } from '../data';
+import GoldLeadModal from './GoldLeadModal';
 
 export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
+  // Lead Generation Modal State - Opens automatically first when someone opens the site/page
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState(true);
+
   // Calculator States
   const [goldWeight, setGoldWeight] = useState(15);
   const [goldPurity, setGoldPurity] = useState('22K');
@@ -122,7 +126,7 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
           "name": "SGC Gold Buying & Pledged Gold Loan Settlement Desk",
           "description": "SGC Gold is the Chandigarh Tricity and Srinagar region's premier gold buyer and finance consultancy, specializing in releasing pledged gold loans from Muthoot, Manappuram, IIFL and commercial banks, with XRF spectrometer testing.",
           "url": window.location.origin + "/?division=gold",
-          "telephone": "+917889434741",
+          "telephone": "+919186376081",
           "priceRange": "₹₹₹",
           "image": window.location.origin + "/src/assets/images/sgc_gold_jewelry_1779942518913.png",
           "address": [
@@ -338,6 +342,9 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
         email: 'No email provided (SGC Gold Portal)',
         phone,
         businessSection: 'gold',
+        service: 'Gold Spot Appraisal & German XRF Assay',
+        source: 'SGC Gold Page Appraisal Form',
+        goldWeight: `${goldWeight}g (${goldPurity})`,
         message: msg || `Spot appraisal and gold assessment request. Purity: ${goldPurity}, Weight: ${goldWeight}g.`
       });
       setIsSubmitting(false);
@@ -346,7 +353,7 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
       setPhone('');
       setMsg('');
       setTimeout(() => setSubmitSuccess(false), 3000);
-    }, 1500);
+    }, 350);
   };
 
   // Toggle FAQ Accordion
@@ -429,14 +436,27 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
             </button>
           </div>
 
-          <a
-            href="tel:7889434741"
-            className="text-xs bg-gradient-to-r from-yellow-600 to-yellow-500 text-black px-4 py-2 rounded font-bold tracking-wider hover:from-yellow-500 hover:to-yellow-400 transition-all shadow-[0_4px_15px_rgba(234,179,8,0.2)] flex items-center gap-1.5 border border-yellow-400/20"
-            id="gold-call-support"
-          >
-            <Phone className="w-3.5 h-3.5" />
-            <span className="font-mono">7889 434 741</span>
-          </a>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setIsLeadModalOpen(true)}
+              className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black px-3 py-2 rounded font-bold text-xs tracking-wider uppercase transition-all shadow-[0_2px_15px_rgba(234,179,8,0.3)] flex items-center gap-1.5 border border-yellow-300/40 cursor-pointer"
+              id="gold-open-lead-header-btn"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">GET INSTANT QUOTE</span>
+              <span className="sm:hidden">QUOTE</span>
+            </button>
+
+            <a
+              href="tel:9186376081"
+              className="text-xs bg-[#111322] hover:bg-yellow-500/10 text-yellow-500 hover:text-yellow-400 px-3 py-2 rounded font-bold tracking-wider transition-all flex items-center gap-1.5 border border-yellow-500/30"
+              id="gold-call-support"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span className="font-mono hidden sm:inline">91863 76081</span>
+              <span className="font-mono sm:hidden">CALL</span>
+            </a>
+          </div>
         </div>
       </header>
 
@@ -495,22 +515,30 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
               </div>
             </div>
 
-            <div className="flex gap-4 pt-3 flex-wrap">
+            <div className="flex gap-3 pt-3 flex-wrap items-center">
               <button
-                onClick={scrollToCalculator}
-                className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3.5 rounded font-bold text-xs tracking-widest uppercase transition-all shadow-lg flex items-center gap-2 cursor-pointer border border-yellow-400/20"
-                id="hero-open-calculator"
+                onClick={() => setIsLeadModalOpen(true)}
+                className="bg-gradient-to-r from-yellow-500 via-yellow-400 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black px-6 py-3.5 rounded font-bold text-xs tracking-widest uppercase transition-all shadow-[0_4px_20px_rgba(234,179,8,0.3)] flex items-center gap-2 cursor-pointer border border-yellow-300/40"
+                id="hero-open-lead-modal"
               >
-                <Calculator className="w-4 h-4" />
-                <span>OPEN LIVE SURPLUS ESTIMATOR</span>
+                <Send className="w-4 h-4" />
+                <span>INSTANT QUOTE &amp; LEAD FORM</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
               <button
+                onClick={scrollToCalculator}
+                className="border border-yellow-500/30 hover:border-yellow-500 bg-yellow-500/5 hover:bg-yellow-500/10 text-yellow-400 px-5 py-3.5 rounded font-bold text-xs tracking-widest uppercase transition-all flex items-center gap-2 cursor-pointer"
+                id="hero-open-calculator"
+              >
+                <Calculator className="w-4 h-4" />
+                <span>SURPLUS ESTIMATOR</span>
+              </button>
+              <button
                 onClick={scrollToInfo}
-                className="border border-yellow-500/30 hover:border-yellow-500 text-yellow-500 px-6 py-3.5 rounded font-bold text-xs tracking-widest uppercase hover:bg-yellow-500/5 transition-all cursor-pointer"
+                className="border border-white/10 hover:border-white/30 text-gray-300 px-5 py-3.5 rounded font-bold text-xs tracking-widest uppercase hover:bg-white/5 transition-all cursor-pointer"
                 id="hero-read-guide"
               >
-                RELEASE PROCESS GUIDE
+                RELEASE GUIDE
               </button>
             </div>
           </div>
@@ -952,7 +980,7 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
                   {isSubmitting ? (
                     <span>TRANSMITTING...</span>
                   ) : submitSuccess ? (
-                    <span className="flex items-center gap-1"><Check className="w-4 h-4 text-green-900" /> APPOINTMENT SECURED</span>
+                    <span className="flex items-center gap-1"><Check className="w-4 h-4 text-green-900" /> OPENING WHATSAPP...</span>
                   ) : (
                     <span className="flex items-center gap-1.5"><Send className="w-3.5 h-3.5" /> SECURE RESERVATION</span>
                   )}
@@ -1010,13 +1038,34 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
           <p>© {new Date().getFullYear()} SGC Gold division of Salafiya Group of Companies. Licensed gold buying &amp; bank settlement desk.</p>
           <div className="flex justify-center gap-6 text-[10px] flex-wrap mt-2">
             <span>Corporate Offices: Sector 17, Chandigarh | Lal Chowk, Srinagar</span>
-            <span>Tel: +91 7889 434 741</span>
+            <span>Tel: +91 91863 76081</span>
             <button onClick={onBackToParent} className="text-yellow-500 font-bold underline hover:text-yellow-400 cursor-pointer">
               SGC CORPORATE HOME
             </button>
           </div>
         </div>
       </footer>
+
+      {/* Floating Instant Lead / Callback Trigger */}
+      <div className="fixed bottom-5 right-5 z-30">
+        <button
+          onClick={() => setIsLeadModalOpen(true)}
+          className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black px-4 py-3 rounded-full font-bold text-xs tracking-wider uppercase shadow-[0_10px_35px_rgba(234,179,8,0.4)] flex items-center gap-2 border border-yellow-300/50 cursor-pointer hover:scale-105 transition-all group"
+          id="gold-floating-lead-btn"
+          title="Open instant gold lead &amp; quote form"
+        >
+          <div className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping shrink-0" />
+          <Send className="w-3.5 h-3.5" />
+          <span className="font-serif font-black">GET GOLD QUOTE</span>
+        </button>
+      </div>
+
+      {/* Auto-opening Lead Generation Modal */}
+      <GoldLeadModal
+        isOpen={isLeadModalOpen}
+        onClose={() => setIsLeadModalOpen(false)}
+        onSubmitInquiry={onSubmitInquiry}
+      />
 
     </div>
   );

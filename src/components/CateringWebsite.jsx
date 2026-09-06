@@ -94,6 +94,8 @@ export default function CateringWebsite({ onBackToParent, onSubmitInquiry }) {
         email: 'No email provided (Salafiya Catering Portal)',
         phone,
         businessSection: 'catering',
+        service: `Event Catering (${eventType} - ${headcount} guests)`,
+        source: 'Salafiya Catering Booking Form',
         message: msg || `Catering arrangement requested for approximately ${headcount} guests.`
       });
       setIsSubmitting(false);
@@ -102,7 +104,7 @@ export default function CateringWebsite({ onBackToParent, onSubmitInquiry }) {
       setPhone('');
       setMsg('');
       setTimeout(() => setSubmitSuccess(false), 3000);
-    }, 1500);
+    }, 350);
   };
 
   return (
@@ -442,7 +444,7 @@ export default function CateringWebsite({ onBackToParent, onSubmitInquiry }) {
                   {isSubmitting ? (
                     <span>DISPATCHING...</span>
                   ) : submitSuccess ? (
-                    <span className="flex items-center gap-1"><Check className="w-4 h-4 text-emerald-950" /> CALLBACK SECURED</span>
+                    <span className="flex items-center gap-1"><Check className="w-4 h-4 text-emerald-950" /> OPENING WHATSAPP...</span>
                   ) : (
                     <span className="flex items-center gap-1.5"><UtensilsCrossed className="w-3.5 h-3.5" /> SECURE EXECUTIVE CALENDAR</span>
                   )}

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Phone, Menu, X, Building2, ShieldCheck } from 'lucide-react';
 import sgcLogo from '../assets/images/sgc_logo_uploaded.png';
 
-export default function Navbar({ onOpenInquiries, inquiriesCount, onOpenAdminDashboard, onOpenAboutPage, onSelectGoldWebsite }) {
+export default function Navbar({ onOpenInquiries, inquiriesCount, onOpenAdminDashboard, onOpenAboutPage, onSelectGoldWebsite, onOpenKnowledgeCenter, activeWebsite }) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
@@ -53,6 +53,7 @@ export default function Navbar({ onOpenInquiries, inquiriesCount, onOpenAdminDas
     { name: 'ABOUT US', id: 'about' },
     { name: 'OUR BUSINESSES', id: 'businesses' },
     { name: 'WHY SGC', id: 'why-sgc' },
+    { name: 'KNOWLEDGE CENTER', id: 'knowledge_center' },
     { name: 'CONTACT US', id: 'contact' },
   ];
 
@@ -93,32 +94,37 @@ export default function Navbar({ onOpenInquiries, inquiriesCount, onOpenAdminDas
 
           {/* Desktop Navlinks */}
           <div className="hidden md:flex items-center space-x-5 lg:space-x-7">
-            {navLinks.map((link) => (
-              <button
-                key={link.id}
-                onClick={() => {
-                  if (link.id === 'about' && onOpenAboutPage) {
-                    onOpenAboutPage();
-                  } else {
-                    scrollToSection(link.id);
-                  }
-                }}
-                className={`relative py-2 text-xs font-semibold tracking-widest transition-colors ${
-                  activeSection === link.id
-                    ? 'text-yellow-500'
-                    : 'text-gray-300 hover:text-white'
-                }`}
-              >
-                {link.name}
-                {activeSection === link.id && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellow-500"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-              </button>
-            ))}
+            {navLinks.map((link) => {
+              const isLinkActive = activeSection === link.id || (link.id === 'knowledge_center' && activeWebsite === 'knowledge_center');
+              return (
+                <button
+                  key={link.id}
+                  onClick={() => {
+                    if (link.id === 'about' && onOpenAboutPage) {
+                      onOpenAboutPage();
+                    } else if (link.id === 'knowledge_center' && onOpenKnowledgeCenter) {
+                      onOpenKnowledgeCenter();
+                    } else {
+                      scrollToSection(link.id);
+                    }
+                  }}
+                  className={`relative py-2 text-xs font-semibold tracking-widest transition-colors ${
+                    isLinkActive
+                      ? 'text-yellow-500'
+                      : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  {link.name}
+                  {isLinkActive && (
+                    <motion.div
+                      layoutId="activeIndicator"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellow-500"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
 
             <button
               onClick={onSelectGoldWebsite}
@@ -197,26 +203,32 @@ export default function Navbar({ onOpenInquiries, inquiriesCount, onOpenAdminDas
             className="md:hidden bg-[#090b11]/98 border-b border-yellow-500/10 shadow-[0_15px_35px_rgba(0,0,0,0.6)]"
           >
             <div className="px-4 pt-2 pb-6 space-y-2">
-              {navLinks.map((link) => (
-                <button
-                  key={link.id}
-                  onClick={() => {
-                    if (link.id === 'about' && onOpenAboutPage) {
-                      setIsOpen(false);
-                      onOpenAboutPage();
-                    } else {
-                      scrollToSection(link.id);
-                    }
-                  }}
-                  className={`block w-full text-left py-3 px-4 text-sm font-semibold tracking-widest rounded-lg transition-all ${
-                    activeSection === link.id
-                      ? 'text-yellow-500 bg-yellow-500/5 border-l-2 border-yellow-500 pl-3'
-                      : 'text-gray-300 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  {link.name}
-                </button>
-              ))}
+              {navLinks.map((link) => {
+                const isLinkActive = activeSection === link.id || (link.id === 'knowledge_center' && activeWebsite === 'knowledge_center');
+                return (
+                  <button
+                    key={link.id}
+                    onClick={() => {
+                      if (link.id === 'about' && onOpenAboutPage) {
+                        setIsOpen(false);
+                        onOpenAboutPage();
+                      } else if (link.id === 'knowledge_center' && onOpenKnowledgeCenter) {
+                        setIsOpen(false);
+                        onOpenKnowledgeCenter();
+                      } else {
+                        scrollToSection(link.id);
+                      }
+                    }}
+                    className={`block w-full text-left py-3 px-4 text-sm font-semibold tracking-widest rounded-lg transition-all ${
+                      isLinkActive
+                        ? 'text-yellow-500 bg-yellow-500/5 border-l-2 border-yellow-500 pl-3'
+                        : 'text-gray-300 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    {link.name}
+                  </button>
+                );
+              })}
 
               <button
                 onClick={() => {
