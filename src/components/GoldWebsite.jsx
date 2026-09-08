@@ -296,6 +296,34 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
     };
   }, []);
 
+  // Handle URL hash & query parameters (e.g. #instant-quote, #quote, #lead-form, ?quote=instant) for Google Ads tracking & sitelinks
+  useEffect(() => {
+    const handleUrlHashAndQuery = () => {
+      const hash = window.location.hash.toLowerCase();
+      const params = new URLSearchParams(window.location.search);
+      const hasQuoteParam = params.get('quote') || params.get('lead') || params.get('instant-quote');
+
+      if (
+        hash === '#instant-quote' ||
+        hash === '#quote' ||
+        hash === '#get-instant-quote' ||
+        hash === '#lead-form' ||
+        hash === '#calculator' ||
+        hasQuoteParam
+      ) {
+        setIsLeadModalOpen(true);
+        const target = document.getElementById('instant-quote') || calculatorRef.current;
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    };
+
+    handleUrlHashAndQuery();
+    window.addEventListener('hashchange', handleUrlHashAndQuery);
+    return () => window.removeEventListener('hashchange', handleUrlHashAndQuery);
+  }, []);
+
   // Compute live calculations based on market API rates
   const goldCalculation = useMemo(() => {
     const rateGram = liveRates?.[goldPurity] || GOLD_RATES[goldPurity] || 14070;
@@ -427,9 +455,9 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
           </div>
 
           <div className="hidden lg:flex items-center space-x-6 text-[10px] font-bold tracking-[0.15em] text-gray-300">
-            <button onClick={scrollToInfo} className="hover:text-yellow-500 transition-colors uppercase cursor-pointer">PLEDGE RELEASE GUIDE</button>
-            <button onClick={scrollToCalculator} className="hover:text-yellow-500 transition-colors uppercase cursor-pointer">LIVE SURPLUS CALCULATOR</button>
-            <button onClick={scrollToContact} className="hover:text-yellow-500 transition-colors uppercase cursor-pointer">BOOK SLOT</button>
+            <a href="#release-guide" onClick={scrollToInfo} className="hover:text-yellow-500 transition-colors uppercase cursor-pointer no-underline">PLEDGE RELEASE GUIDE</a>
+            <a href="#instant-quote" onClick={scrollToCalculator} className="hover:text-yellow-500 transition-colors uppercase cursor-pointer no-underline">LIVE SURPLUS CALCULATOR</a>
+            <a href="#book-slot" onClick={scrollToContact} className="hover:text-yellow-500 transition-colors uppercase cursor-pointer no-underline">BOOK SLOT</a>
             
             <button
               onClick={handleCopyLandingUrl}
@@ -447,15 +475,32 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => setIsLeadModalOpen(true)}
-              className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black px-3 py-2 rounded font-bold text-xs tracking-wider uppercase transition-all shadow-[0_2px_15px_rgba(234,179,8,0.3)] flex items-center gap-1.5 border border-yellow-300/40 cursor-pointer"
-              id="gold-open-lead-header-btn"
+            <a
+              href="#instant-quote"
+              id="get-instant-quote"
+              name="get-instant-quote"
+              data-track="get-instant-quote"
+              aria-label="Get Instant Quote"
+              title="Get Instant Gold Valuation & Pledged Loan Quote"
+              onClick={(e) => {
+                if (typeof window !== 'undefined' && window.dataLayer) {
+                  window.dataLayer.push({
+                    event: 'get_instant_quote_click',
+                    event_category: 'Quote',
+                    event_label: 'Header Link',
+                    link_url: '#instant-quote',
+                    element_id: 'get-instant-quote'
+                  });
+                }
+                setIsLeadModalOpen(true);
+                calculatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
+              className="gtm-instant-quote-link gtm-track-quote bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black px-3 py-2 rounded font-bold text-xs tracking-wider uppercase transition-all shadow-[0_2px_15px_rgba(234,179,8,0.3)] flex items-center gap-1.5 border border-yellow-300/40 cursor-pointer no-underline"
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="w-3.5 h-3.5 shrink-0" />
               <span className="hidden sm:inline">GET INSTANT QUOTE</span>
-              <span className="sm:hidden">QUOTE</span>
-            </button>
+              <span className="sm:hidden">GET QUOTE</span>
+            </a>
 
             <a
               href="tel:9186376081"
@@ -526,30 +571,50 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
             </div>
 
             <div className="flex gap-3 pt-3 flex-wrap items-center">
-              <button
-                onClick={() => setIsLeadModalOpen(true)}
-                className="bg-gradient-to-r from-yellow-500 via-yellow-400 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black px-6 py-3.5 rounded font-bold text-xs tracking-widest uppercase transition-all shadow-[0_4px_20px_rgba(234,179,8,0.3)] flex items-center gap-2 cursor-pointer border border-yellow-300/40"
-                id="hero-open-lead-modal"
+              <a
+                href="#instant-quote"
+                id="hero-get-instant-quote"
+                name="get-instant-quote"
+                data-track="get-instant-quote"
+                aria-label="Get Instant Quote"
+                title="Get Instant Quote & Valuation Form"
+                onClick={(e) => {
+                  if (typeof window !== 'undefined' && window.dataLayer) {
+                    window.dataLayer.push({
+                      event: 'get_instant_quote_click',
+                      event_category: 'Quote',
+                      event_label: 'Hero CTA',
+                      link_url: '#instant-quote',
+                      element_id: 'hero-get-instant-quote'
+                    });
+                  }
+                  setIsLeadModalOpen(true);
+                  calculatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+                className="gtm-instant-quote-link gtm-track-quote bg-gradient-to-r from-yellow-500 via-yellow-400 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black px-6 py-3.5 rounded font-bold text-xs tracking-widest uppercase transition-all shadow-[0_4px_20px_rgba(234,179,8,0.3)] flex items-center gap-2 cursor-pointer border border-yellow-300/40 no-underline"
               >
                 <Send className="w-4 h-4" />
-                <span>INSTANT QUOTE &amp; LEAD FORM</span>
+                <span>GET INSTANT QUOTE</span>
                 <ChevronRight className="w-4 h-4" />
-              </button>
-              <button
+              </a>
+              <a
+                href="#instant-quote"
                 onClick={scrollToCalculator}
-                className="border border-yellow-500/30 hover:border-yellow-500 bg-yellow-500/5 hover:bg-yellow-500/10 text-yellow-400 px-5 py-3.5 rounded font-bold text-xs tracking-widest uppercase transition-all flex items-center gap-2 cursor-pointer"
+                className="border border-yellow-500/30 hover:border-yellow-500 bg-yellow-500/5 hover:bg-yellow-500/10 text-yellow-400 px-5 py-3.5 rounded font-bold text-xs tracking-widest uppercase transition-all flex items-center gap-2 cursor-pointer no-underline"
                 id="hero-open-calculator"
+                title="Calculate Gold Loan Surplus Payout"
               >
                 <Calculator className="w-4 h-4" />
                 <span>SURPLUS ESTIMATOR</span>
-              </button>
-              <button
+              </a>
+              <a
+                href="#release-guide"
                 onClick={scrollToInfo}
-                className="border border-white/10 hover:border-white/30 text-gray-300 px-5 py-3.5 rounded font-bold text-xs tracking-widest uppercase hover:bg-white/5 transition-all cursor-pointer"
+                className="border border-white/10 hover:border-white/30 text-gray-300 px-5 py-3.5 rounded font-bold text-xs tracking-widest uppercase hover:bg-white/5 transition-all cursor-pointer no-underline"
                 id="hero-read-guide"
               >
                 RELEASE GUIDE
-              </button>
+              </a>
             </div>
           </div>
 
@@ -609,19 +674,21 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
+            <a
+              href="#instant-quote"
               onClick={scrollToCalculator}
-              className="bg-yellow-500 hover:bg-yellow-400 text-black px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center gap-1 cursor-pointer"
+              className="bg-yellow-500 hover:bg-yellow-400 text-black px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center gap-1 cursor-pointer no-underline"
+              title="Jump to live surplus calculator"
             >
               <Calculator className="w-3 h-3" />
               <span>CALCULATE VALUE</span>
-            </button>
+            </a>
           </div>
         </div>
       </div>
 
       {/* 3. CORE EXPLANATION: HOW TO RELEASE PLEDGED GOLD (JEWEL HOUSE STYLE) */}
-      <section ref={infoRef} className="py-20 bg-[#0a0a0f] border-y border-white/5 text-left scroll-mt-20">
+      <section id="release-guide" ref={infoRef} className="py-20 bg-[#0a0a0f] border-y border-white/5 text-left scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center space-y-2 mb-16">
@@ -701,7 +768,16 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
       </section>
 
       {/* 4. INTERACTIVE BANK RELEASE & SURPLUS ESTIMATOR (JEWEL HOUSE STYLE) */}
-      <section ref={calculatorRef} className="py-20 bg-[#060608] text-left scroll-mt-20 relative">
+      <section 
+        id="instant-quote" 
+        ref={calculatorRef} 
+        className="py-20 bg-[#060608] text-left scroll-mt-20 relative"
+      >
+        {/* Deep Link Anchor Targets for Google Ads */}
+        <span id="quote" className="absolute -top-24 left-0 pointer-events-none" />
+        <span id="get-instant-quote" className="absolute -top-24 left-0 pointer-events-none" />
+        <span id="lead-form" className="absolute -top-24 left-0 pointer-events-none" />
+        <span id="calculator" className="absolute -top-24 left-0 pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
@@ -1021,19 +1097,19 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
                   <div className="p-4">
                     <span className="text-slate-500 font-bold block">24K Pure Gold</span>
                     <span className="text-[#090b11] text-sm sm:text-base font-mono font-black mt-1 block">
-                      ₹7,550/g
+                      ₹{(liveRates?.['24K'] || GOLD_RATES['24K']).toLocaleString('en-IN')}/g
                     </span>
                   </div>
                   <div className="p-4">
                     <span className="text-slate-500 font-bold block">22K Jewelry</span>
                     <span className="text-[#090b11] text-sm sm:text-base font-mono font-black mt-1 block">
-                      ₹6,920/g
+                      ₹{(liveRates?.['22K'] || GOLD_RATES['22K']).toLocaleString('en-IN')}/g
                     </span>
                   </div>
                   <div className="p-4">
                     <span className="text-slate-500 font-bold block">18K Standard</span>
                     <span className="text-[#090b11] text-sm sm:text-base font-mono font-black mt-1 block">
-                      ₹5,660/g
+                      ₹{(liveRates?.['18K'] || GOLD_RATES['18K']).toLocaleString('en-IN')}/g
                     </span>
                   </div>
                 </div>
@@ -1046,7 +1122,7 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
       </section>
 
       {/* 6. APPOINTMENT SLOT BOOKING FORM */}
-      <section ref={contactRef} className="py-20 bg-[#0b0b12] text-left border-t border-white/5 scroll-mt-20">
+      <section id="book-slot" ref={contactRef} className="py-20 bg-[#0b0b12] text-left border-t border-white/5 scroll-mt-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center space-y-2 mb-12">
@@ -1174,16 +1250,31 @@ export default function GoldWebsite({ onBackToParent, onSubmitInquiry }) {
 
       {/* Floating Instant Lead / Callback Trigger */}
       <div className="fixed bottom-5 right-5 z-30">
-        <button
-          onClick={() => setIsLeadModalOpen(true)}
-          className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black px-4 py-3 rounded-full font-bold text-xs tracking-wider uppercase shadow-[0_10px_35px_rgba(234,179,8,0.4)] flex items-center gap-2 border border-yellow-300/50 cursor-pointer hover:scale-105 transition-all group"
-          id="gold-floating-lead-btn"
+        <a
+          href="#instant-quote"
+          id="floating-get-instant-quote"
+          name="get-instant-quote"
+          data-track="get-instant-quote"
+          aria-label="Get Instant Quote"
           title="Open instant gold lead &amp; quote form"
+          onClick={(e) => {
+            if (typeof window !== 'undefined' && window.dataLayer) {
+              window.dataLayer.push({
+                event: 'get_instant_quote_click',
+                event_category: 'Quote',
+                event_label: 'Floating CTA',
+                link_url: '#instant-quote',
+                element_id: 'floating-get-instant-quote'
+              });
+            }
+            setIsLeadModalOpen(true);
+          }}
+          className="gtm-instant-quote-link gtm-track-quote bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black px-4 py-3 rounded-full font-bold text-xs tracking-wider uppercase shadow-[0_10px_35px_rgba(234,179,8,0.4)] flex items-center gap-2 border border-yellow-300/50 cursor-pointer hover:scale-105 transition-all group no-underline"
         >
           <div className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping shrink-0" />
           <Send className="w-3.5 h-3.5" />
-          <span className="font-serif font-black">GET GOLD QUOTE</span>
-        </button>
+          <span className="font-serif font-black">GET INSTANT QUOTE</span>
+        </a>
       </div>
 
       {/* Auto-opening Lead Generation Modal */}

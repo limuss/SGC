@@ -129,6 +129,23 @@ export default function GoldLeadModal({ isOpen, onClose, onSubmitInquiry }) {
 
     // 3. Centralized app submission (stores to local cache, Firestore, Supabase, Formspree & WhatsApp)
     onSubmitInquiry(leadPayload);
+
+    // 3b. Push conversion event to Google Tag Manager dataLayer for Google Ads
+    if (typeof window !== 'undefined' && window.dataLayer) {
+      window.dataLayer.push({
+        event: 'generate_lead',
+        event_category: 'Lead',
+        event_label: leadPayload.service,
+        service: leadPayload.service,
+        gold_weight: finalWeight,
+        city: city
+      });
+      window.dataLayer.push({
+        event: 'conversion',
+        conversion_event: 'gold_quote_submitted'
+      });
+    }
+
     setIsSubmitting(false);
     setIsSuccess(true);
 

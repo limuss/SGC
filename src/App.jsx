@@ -58,7 +58,10 @@ export default function App() {
         path.includes('sgc gold') || 
         path.includes('gold') || 
         hash.includes('gold') || 
-        params.get('division') === 'gold'
+        hash.includes('quote') || 
+        hash.includes('instant-quote') || 
+        params.get('division') === 'gold' ||
+        params.get('quote')
       ) {
         return 'gold';
       }
